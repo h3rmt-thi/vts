@@ -1,0 +1,11 @@
+## Aufgabe (Synchronisation von Prozessen mit Semaphoren -- IPC)
+- Erweitern Sie nun die Lösung aus Aufgabe 1 um Synchronisationsmechanismen. Verwenden Sie hierzu den Semaphore-Mechanismus aus dem IPC-Paket. (man 5 ipc). Gehen Sie hierzu wie im folgenden Aufgabentext vorgeschlagen schrittweise vor. Beachten Sie hierbei unbedingt, dass Sie bei jedem Systemaufruf mögliche Fehlermeldungen des Betriebsystems abfangen und in diesem Fall das Programm mit perror und exit(1) beenden. Siehe dazu Vorlesung, Kapitel III.5.
+- Erzeugen Sie sich mit der Funktion `ftok(<datei>, <int>)` einen eindeutigen Schlüssel für die zu erzeugenden Semaphore. Verschaffen Sie sich Zugriff auf eine Gruppe bestehend aus einem Semaphor mit der Funktion semget(). Verwenden Sie als Zugriffsrechte: `IPC_CREAT|0666`, damit der Semaphorsatz mit geeigneten Rechten erzeugt wird, falls er noch nicht existiert. Hinweise: Nehmen Sie hierzu die Codefragmente aus der Vorlesung, Kapitel III.5
+- Implementieren Sie die folgenden Funktionen:
+  - init_sem(): Hierbei wird unter Verwendung der Funktion semctl() mit der Option SETVAL das Semaphor mit 1 ("Betriebsmittel frei") initialisiert.
+  - P(int sem_num): Hierbei wird mit der Funktion semop() versucht das Semaphor zu dekrementieren. Beachten Sie hierbei, dass als Operand ein array von Semaphoren übergeben werden muss.
+  - V(int sem_num): Hierbei wird mit der Funktion semop() versucht das als Argument übergebene Semaphor zu inkrementieren. Beachten Sie hierbei, dass als Operand ein array von Semaphoren übergeben werden muss. In diesem Fall ist es halt nur ein Array mit genau einem Element.
+  - Schützen Sie nun die kritischen Bereiche des Prozesses mit P- und V-Operationen.
+- Interpretieren Sie nun die Ausgaben.
+  - Überprüfen Sie den erfolgreichen Aufruf der Systemfunktionen. Im Fehlerfall, also bei Rückgabe des Wertes -1, geben Sie Meldungen mit der Funktion perror aus. Dies erleichtert die Fehlersuche enorm.
+  - Das erfolgreiche Anlegen einer Semaphorgruppe können Sie in der Shell mit dem Kommando ipcs überprüfen. Etwaige zu viel angelegte Gruppen können mit dem Kommando ipcrm –s <sem_id> gelöscht werden.
