@@ -1,11 +1,8 @@
-## Aufgabe (Synchronisation von Prozessen mit Semaphoren -- IPC)
-- Erweitern Sie nun die Lösung aus Aufgabe 1 um Synchronisationsmechanismen. Verwenden Sie hierzu den Semaphore-Mechanismus aus dem IPC-Paket. (man 5 ipc). Gehen Sie hierzu wie im folgenden Aufgabentext vorgeschlagen schrittweise vor. Beachten Sie hierbei unbedingt, dass Sie bei jedem Systemaufruf mögliche Fehlermeldungen des Betriebsystems abfangen und in diesem Fall das Programm mit perror und exit(1) beenden. Siehe dazu Vorlesung, Kapitel III.5.
-- Erzeugen Sie sich mit der Funktion `ftok(<datei>, <int>)` einen eindeutigen Schlüssel für die zu erzeugenden Semaphore. Verschaffen Sie sich Zugriff auf eine Gruppe bestehend aus einem Semaphor mit der Funktion semget(). Verwenden Sie als Zugriffsrechte: `IPC_CREAT|0666`, damit der Semaphorsatz mit geeigneten Rechten erzeugt wird, falls er noch nicht existiert. Hinweise: Nehmen Sie hierzu die Codefragmente aus der Vorlesung, Kapitel III.5
-- Implementieren Sie die folgenden Funktionen:
-  - init_sem(): Hierbei wird unter Verwendung der Funktion semctl() mit der Option SETVAL das Semaphor mit 1 ("Betriebsmittel frei") initialisiert.
-  - P(int sem_num): Hierbei wird mit der Funktion semop() versucht das Semaphor zu dekrementieren. Beachten Sie hierbei, dass als Operand ein array von Semaphoren übergeben werden muss.
-  - V(int sem_num): Hierbei wird mit der Funktion semop() versucht das als Argument übergebene Semaphor zu inkrementieren. Beachten Sie hierbei, dass als Operand ein array von Semaphoren übergeben werden muss. In diesem Fall ist es halt nur ein Array mit genau einem Element.
-  - Schützen Sie nun die kritischen Bereiche des Prozesses mit P- und V-Operationen.
-- Interpretieren Sie nun die Ausgaben.
-  - Überprüfen Sie den erfolgreichen Aufruf der Systemfunktionen. Im Fehlerfall, also bei Rückgabe des Wertes -1, geben Sie Meldungen mit der Funktion perror aus. Dies erleichtert die Fehlersuche enorm.
-  - Das erfolgreiche Anlegen einer Semaphorgruppe können Sie in der Shell mit dem Kommando ipcs überprüfen. Etwaige zu viel angelegte Gruppen können mit dem Kommando ipcrm –s <sem_id> gelöscht werden.
+## Aufgabe (Dining Philosophers)
+Gegeben ist die folgende Aufgabenstellung, die auf Dijkstra zurückgeht. Der Tagesablauf eines Philosophen besteht aus einer alternierenden Folge der Tätigkeiten: Essen und Denken. Es befinden sich 5 Philosophen an einem Tisch. An diesem Tisch befinden sich zudem 5 Teller mit Spaghetti und 5 Gabeln:
+Zum Essen benötigt jeder Philosoph 2 Gabeln, die sich links und rechts von seinem Teller befinden. (Es existiert auch eine chinesische Variante mit 2 Essstäbchen.) Beachten Sie auch, dass die Philosophen an festen Plätzen am Tisch sitzen.
+- Skizzieren Sie eine Lösung der Synchronisation der Philosophen mit Semaphoren mit einer von Ihnen gewählten Beschreibungsform (Pseudocode, Diagramm, oder ähnliches). Diskutieren Sie die Lösungsskizze. Hinweis: Berücksichtigen Sie hierbei, dass bei der folgenden Programmierung bei den IPC- Semaphoren auch Manipulation von Semaphor-Gruppen als eine atomare Aktion möglich sind. Somit eine atomare Operation P(S1, S2) möglich ist. Dies wird dann mit der Operation semop mit 2 Elementen implementiert.
+- Setzen Sie die Lösungsskizze in ein C-Programm um. Gehen Sie hierfür wie folgt schrittweise vor:
+  - Erstellen Sie den Rahmen des Programms indem Sie die Kernelemente des Handelns der Philosophen beschreiben. Achten Sie auch auf unterschiedliche Essens und Denkzeiten. Verwenden Sie hierzu die Zufallszahlenfunktion (srand() bzw rand()); Ignorieren Sie hierzu die Gabeln. Sorgen Sie auch für geeignete Ausgaben. Testen Sie den Ablauf.
+  - Erweitern Sie nun den Algorithmus um Synchronisationselemente. Verwenden Sie hierzu geeignete Hilfsfunktionen, die sie auch aus Blatt1 übernehmen können
+- Testen Sie den Algorithmus. Entwickeln Sie hierfür eine geeignete Teststrategie
