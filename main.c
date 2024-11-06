@@ -1,12 +1,11 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/sem.h>
 
-const int CHILDREN = 3;
-const int SLEEP_TIME = 1;
-const int SIMULATIONS = 3;
+#define FORKS 5
 
 int init_sem() {
     const int sem_key = ftok("/home/user", '1');
@@ -14,16 +13,19 @@ int init_sem() {
         perror("ftok Error");
         exit(1);
     }
-    const int sem_id = semget(sem_key, 1, IPC_CREAT | 0666);
+    const int sem_id = semget(sem_key, FORKS, IPC_CREAT | 0666);
     if (sem_id < 0) {
         perror("semget Error");
         exit(1);
     }
-    const int ret = semctl(sem_id, 0, SETVAL, 1);
-    if (ret < 0) {
-        perror("semctl Error");
-        exit(1);
+    for (int i = 0; i < FORKS; i++) {
+        const int ret = semctl(sem_id, i, SETVAL, 1);
+        if (ret < 0) {
+            perror("semctl Error");
+            exit(1);
+        }
     }
+
     return sem_id;
 }
 
@@ -36,46 +38,90 @@ int rem_sem(const int sem_id) {
     return ret;
 }
 
-void P(const int sem_id) {
-    struct sembuf sem_buf = {.sem_num = 0, .sem_op = -1, .sem_flg = 0};
-    const int res = semop(sem_id, &sem_buf, 1);
+void P(const int sem_id, const int l, const int r) {
+    struct sembuf sem_buf[2] = {{.sem_num = l, .sem_op = -1, .sem_flg = 0}, {.sem_num = r, .sem_op = -1, .sem_flg = 0}};
+    const int res = semop(sem_id, sem_buf, 2);
     if (res < 0) {
         perror("semop Error");
         exit(1);
     }
 }
 
-void V(const int sem_id) {
-    struct sembuf sem_buf = {.sem_num = 0, .sem_op = 1, .sem_flg = 0};
-    const int res = semop(sem_id, &sem_buf, 1);
+void V(const int sem_id, const int l, const int r) {
+    struct sembuf sem_buf[2] = {{.sem_num = l, .sem_op = 1, .sem_flg = 0}, {.sem_num = r, .sem_op = 1, .sem_flg = 0}};
+    const int res = semop(sem_id, sem_buf, 2);
     if (res < 0) {
         perror("semop Error");
         exit(1);
     }
 }
 
-void sim(const int nr, const int sem_id) {
-    for (int i = 0; i < SIMULATIONS; i++) {
-        P(sem_id);
-        printf("Prozess %d betritt kritischen Bereich zum %d.mal\n", nr, i);
-        sleep(SLEEP_TIME);
-        printf("Prozess %d verlässt kritischen Bereich zum %d.mal\n", nr, i);
-        V(sem_id);
-    }
+void P2(const int sem_id, const int l, const int r) {
+    if (l % 2 == 0) {
+        struct sembuf sem_buf = {.sem_num = l, .sem_op = -1, .sem_flg = 0};
+        const int res = semop(sem_id, &sem_buf, 1);
+        if (res < 0) {
+            perror("semop Error");
+            exit(1);
+        }
 
-    printf("Prozess %d betritt unkritischen Bereich\n", nr);
-    sleep(SLEEP_TIME);
-    printf("Prozess %d verlässt unkritischen Bereich\n", nr);
-    exit(0);
+        struct sembuf sem_buf_2 = {.sem_num = r, .sem_op = -1, .sem_flg = 0};
+        const int res_2 = semop(sem_id, &sem_buf_2, 1);
+        if (res_2 < 0) {
+            perror("semop Error");
+            exit(1);
+        }
+    } else {
+        struct sembuf sem_buf = {.sem_num = r, .sem_op = -1, .sem_flg = 0};
+        const int res = semop(sem_id, &sem_buf, 1);
+        if (res < 0) {
+            perror("semop Error");
+            exit(1);
+        }
+
+        struct sembuf sem_buf_2 = {.sem_num = l, .sem_op = -1, .sem_flg = 0};
+        const int res_2 = semop(sem_id, &sem_buf_2, 1);
+        if (res_2 < 0) {
+            perror("semop Error");
+            exit(1);
+        }
+    }
 }
 
-void main(void) {
+void think(const int nr, const int l, const int r) {
+    printf("+ %d (%d, %d) %s\n", nr, l, r, "started thinking...");
+    sleep(rand() % 10 + 1);
+    // sleep(3);
+    printf("- %d (%d, %d) %s\n", nr, l, r, "stopped thinking...");
+}
+
+void eat(const int nr, const int l, const int r) {
+    printf("+ %d (%d, %d) %s\n", nr, l, r, "started eating...");
+    sleep(rand() % 10 + 1);
+    // sleep(3);
+    printf("- %d (%d, %d) %s\n", nr, l, r, "stopped eating...");
+}
+
+void child(const int nr, const int sem_id) {
+    const int l = nr;
+    const int r = (nr + 1) % FORKS;
+    while (true) {
+        think(nr, l, r);
+        P(sem_id, l, r);
+        // P2(sem_id, l, r);
+        eat(nr, l, r);
+        V(sem_id, l, r);
+    }
+}
+
+void main() {
     const int sem_id = init_sem();
-    for (int i = 0; i < CHILDREN; i++) {
+    for (int i = 0; i < FORKS; i++) {
         const int pid = fork();
         if (pid == 0) {
-            printf("Child %d with pid %d\n", i, getpid());
-            sim(i, sem_id);
+            srand(getpid());
+            printf("Child %d with pid %d spawned\n", i, getpid());
+            child(i, sem_id);
         }
         if (pid == -1) {
             perror("Error forking");
@@ -83,7 +129,7 @@ void main(void) {
         }
     }
     // wait for all children to finish
-    for (int i = 0; i < CHILDREN; i++) {
+    for (int i = 0; i < FORKS; i++) {
         wait(NULL);
     }
     printf("All children finished\n");
