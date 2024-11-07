@@ -1,8 +1,9 @@
-## Aufgabe (Dining Philosophers)
-Gegeben ist die folgende Aufgabenstellung, die auf Dijkstra zurückgeht. Der Tagesablauf eines Philosophen besteht aus einer alternierenden Folge der Tätigkeiten: Essen und Denken. Es befinden sich 5 Philosophen an einem Tisch. An diesem Tisch befinden sich zudem 5 Teller mit Spaghetti und 5 Gabeln:
-Zum Essen benötigt jeder Philosoph 2 Gabeln, die sich links und rechts von seinem Teller befinden. (Es existiert auch eine chinesische Variante mit 2 Essstäbchen.) Beachten Sie auch, dass die Philosophen an festen Plätzen am Tisch sitzen.
-- Skizzieren Sie eine Lösung der Synchronisation der Philosophen mit Semaphoren mit einer von Ihnen gewählten Beschreibungsform (Pseudocode, Diagramm, oder ähnliches). Diskutieren Sie die Lösungsskizze. Hinweis: Berücksichtigen Sie hierbei, dass bei der folgenden Programmierung bei den IPC- Semaphoren auch Manipulation von Semaphor-Gruppen als eine atomare Aktion möglich sind. Somit eine atomare Operation P(S1, S2) möglich ist. Dies wird dann mit der Operation semop mit 2 Elementen implementiert.
-- Setzen Sie die Lösungsskizze in ein C-Programm um. Gehen Sie hierfür wie folgt schrittweise vor:
-  - Erstellen Sie den Rahmen des Programms indem Sie die Kernelemente des Handelns der Philosophen beschreiben. Achten Sie auch auf unterschiedliche Essens und Denkzeiten. Verwenden Sie hierzu die Zufallszahlenfunktion (srand() bzw rand()); Ignorieren Sie hierzu die Gabeln. Sorgen Sie auch für geeignete Ausgaben. Testen Sie den Ablauf.
-  - Erweitern Sie nun den Algorithmus um Synchronisationselemente. Verwenden Sie hierzu geeignete Hilfsfunktionen, die sie auch aus Blatt1 übernehmen können
-- Testen Sie den Algorithmus. Entwickeln Sie hierfür eine geeignete Teststrategie
+## Aufgabe (Reader/Writer)
+Im Folgenden soll das typische Reader/Writer-Problem behandelt werden, wie dies zum Beispiel bei einem Zugriff auf einen Datensatz bei einer Reisebuchung vorkommen kann. Benutzen Sie als Implementierungsgrundlage den Algorithmus aus der Vorlesung, Kapitel III.6. Verwenden Sie an Stelle der Variablen ein Semaphor aus dem sie mit semctl und der Option GETVALL den Wert auslesen, bzw. SETVAL den Wert schreiben. Stellen Sie durch Synchronisation mit Semaphoren sicher, dass nur maximal ein Prozess schreibenden Zugriff hat und hierbei insbesondere kein lesender Prozess erlaubt ist. Die Anzahl der gleichzeitig lesenden Prozesse ist unbeschränkt. Verwenden Sie hierzu die folgenden Semaphore:
+1. WRITER: Stellt sicher, dass nur maximal ein Prozess schreibt und keiner liest 
+2. READER: Ein Zähler der die Anzahl der lesenden Prozesse speichert. Achtung: dieses Semaphor wird nicht zum Blockieren verwendet, sondern nur als globale/r Variable/Zähler. 
+3. MUTEX: Zur Sicherstellung der Atomarität der Synchronisationsaktionen, falls erforderlich
+
+Gehen Sie hierbei wie folgt schrittweise vor.
+1. Entwickeln Sie den Rahmen mit dem Aufruf von 5 Leseprozessen und 2 Schreibprozesse. Implementieren Sie jeweils die Funktionen der Lese-und Schreibprozesse, die in einer Schleife jeweils dreimal eine Zyklus durchlaufen: Simulierter Zugriff auf Variable; 1 Sekunde warten; unkritischer Bereich; 1 Sekunde warten. Schützen Sie den kritischen Bereich nicht mit Semaphoren. Der Zugriff erfolgt unsynchronisiert. Überprüfen Sie den Algorithmus mit geeigneten Ausgaben.
+2. Implementieren Sie die Lösung aus Kapitel III.6 und überprüfen Sie deren Funktion.
