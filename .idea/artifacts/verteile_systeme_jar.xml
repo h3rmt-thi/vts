@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="verteile_systeme:jar">
+    <output-path>$PROJECT_DIR$/dist/artifacts/verteile_systeme_jar</output-path>
+    <root id="archive" name="verteile_systeme_server.jar">
+      <element id="module-output" name="verteile_systeme" />
+    </root>
+  </artifact>
+</component>
