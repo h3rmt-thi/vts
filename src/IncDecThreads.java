@@ -39,18 +39,15 @@ public class IncDecThreads extends Thread {
 
     // Einfach rauf oder runter z?hlen...
     public void demoSync() {
-        for (long i = 0; i < 100; i++) {
-            zaehler = zaehler + increment;
-            try {
-                sleep((int) (1000 * Math.random()));
-            } catch (Exception e) {
-                return;
+        for (long i = 0; i < MAX; i++) {
+            synchronized (IncDecThreads.class) {
+                zaehler = zaehler + increment;
             }
         }
     }
 
     public void run() {
 //        demoUnSync();  // Unsynchronisiertes Z?hlen
-//        demoSync();  // Synchronisiertes Z?hlen
+        demoSync();  // Synchronisiertes Z?hlen
     }
 }
