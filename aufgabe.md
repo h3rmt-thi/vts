@@ -1,9 +1,20 @@
-## Aufgabe (threads in JAVA)
+## Aufgabe (Synchronisation von Threads in JAVA)
 
-Im Folgenden soll ein typisches Schreiber/Leser-Problem realisiert werden. Verwenden Sie als Ausgangsbasis die jeweils angegebenen Module. Es soll eine Schachfigur auf der Hauptdiagonalen wahlfrei zufällig verschoben werden. Hierzu werden zwei Threads zum Schreiben und auch zum Lesen der Position realisiert. Verwenden Sie als Grundlage zum Erzeugen der Threads hierzu die Vorlesung, Kapitel II.3. Anmerkung: In den ersten Teilaufgaben erfolgt keine Synchronisation der Prozesse.
+Gegeben im Verzeichnis Vorlagen ist die Klasse UniqueId, mit folgenden Eigenschaften:
 
-Gehen Sie hierbei wie folgt schrittweise vor.
+- Dem Konstruktor wird als Argument ein Dateiname übergeben.
+- Die Methode init(<wert>), die den ihr übergebenen Wert als ganze Zahl in die mit dem Konstruktor angegebene Datei schreibt.
+- Die Methode getNext(), die den aktuellen Wert aus der Datei liest und die Datei schließt um eine längere Verarbeitung zu simulieren. Anschließend wird der um eins erhöhte Wert in die erneut geöffnete Datei geschrieben und als Rückgabewert an die aufrufende Methode zurückgegeben.
+- Zum Schreiben und Lesen werden die Methoden (readInt und writeInt) der Klassen DataOutputStream und DataInputStream verwendet
 
-- Verwenden Sie die vorgegebenen Klassen Figur, Schreiber, Leser und MachMal. Erweitern Sie die Klasse Figur indem Sie die Methoden setPosition und getPosition (gibt die Position an stdout aus) in einer getrennten Klasse implementieren. Verwenden Sie hierbei Vererbung. Beim Setzen der Position bauen Sie eine Verzögerung von einer Zehntelsekunde (MachMal.eineZehntelSekundeLangGarNichts()) zwischen dem Belegen des X-Wertes und des Y-Wertes ein. Damit die Effekte auch beobachtbar sind, ergänzen Sie auch die Methode getPosition mit einer Verzögerung von einer Sekunde. Erstellen Sie nun die Klasse FigurenThreads, in der jeweils der Leser und der Schreiber gestartet werden. Achten Sie darauf, dass die Lese- und auch die Schreib-Threads im Hintergrund laufen. Dies erreicht man durch setDaemon(true)
-- Starten Sie das Programm und interpretieren Sie die Ausgaben. Was ist die Erklärung für dieses Verhalten?
-- Synchronisieren Sie die Module.
+Erzeugen Sie nun eine Klasse Test, bei der:
+
+- eine Datei id.dat erzeugt und mit einem Wert 10000 initialisiert wird
+- jeweils 5 gleichartige Threads, also unterschiedliche Objekte, erzeugt werden.
+- jeder dieser Threads 10-mal die ID mit der Methode getNext erhöht und seinen Namen, sowie den Rückgabewert ausgibt.
+
+Testen Sie die unsynchronisierten Klassen ausreichend. Überprüfen Sie hierbei insbesondere die Programmausgaben.
+Synchronisieren Sie nun die Methoden getNext(), da diese nebenläufig aufgerufen werden können.
+Testen Sie die modifizierten Klassen ausreichend. Überprüfen Sie hierbei insbesondere die Programmausgaben.
+
+Hinweis: Bitte beachten Sie dass der Scheduling-Algorithmus der JAVA-VM nicht näher spezifiziert ist. Insbesondere wird keine Fairness zugesichert.
